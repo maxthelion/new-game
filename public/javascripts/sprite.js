@@ -3,6 +3,7 @@ var sprites = {}
 var spritesArray = []
 sprites['s'] = {} // terrain
 sprites['b'] = {} // buildings
+sprites['bits'] = {} //bits of bodies
 
 var redoSprites = function(){
 	spritesArray = []

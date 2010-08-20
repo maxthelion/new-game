@@ -23,12 +23,12 @@ sprites_img = new Image();
 var start = function(){
 	playing = true;
 	globalInterval = setInterval(frameFunction, 60);
-	addSoldier(200, 100);
-	addBase(400, 100)
+	addSoldier(50, 100);
+	addBase(20, 100)
 }
 
 $().ready(function(){	
-	grid = GridGenerator(50, 30);		
+	grid = GridGenerator(40, 10);		
 	mygrid = new Grid('canvas', grid);
 	
 	sprites_img.src = 'soldier.png';
@@ -44,7 +44,7 @@ var addBase = function(x, y){
 		 name: 'base',
 		 health: 30,
 		 type: Base,
-		 spriteX: 200
+		 spriteX: 160
 	}
 	for (i in attrs) {
 		b[i] = attrs[i]
@@ -92,30 +92,40 @@ var checkSoldierAtLocation = function(x, y){
 }
 
 setSelectedUnits = function(soldiers){
+	$('#units').empty()
 	for(i in currentSoldiers){
 		currentSoldiers[i].selected = false
 	}
 	currentSoldiers = [];
 	showActionsForSoldier(soldiers[0])
-	$('#units').empty()
 	for (i in soldiers){
 		soldiers[i].selected = true
 		currentSoldiers.push(soldiers[i])
-		$('#units').append('<p> soldier '+soldiers[i].id+'</p>')
+		$('#units').append('<p> soldier '+soldiers[i].id+'</p>').data('foo', soldiers[i]).click(function(){	
+			setSelectedUnits([$(this).data('foo')]);
+		});
 	}
 }
 showActionsForSoldier = function(s){
+	$('#tools').empty()
 	if (s){
-		$('#tools').empty()
 		for (i in s.actions){
 			var button = $('<a href="#"></a>').text(s.actions[i])
 			button.data('foo', s.actions[i])
 			button.click(function(){
 				setCurrentAction($(this).data('foo'))
+				$(this).addClass('selected');
 			})
 			$('#tools').append(button)
 		}
 	}
+}
+executeCurrentAction = function(x, y){
+	for (i in currentSoldiers){
+		currentSoldiers[i].doCurrentAction(currentAction, x,y)
+	}
+	currentAction = null
+	$('.selected').removeClass('selected');
 }
 
 var setCurrentAction = function(a){
@@ -123,8 +133,13 @@ var setCurrentAction = function(a){
 		for (i in currentSoldiers){
 			currentSoldiers[i].stop()
 		}
+	} else if (a == 'trainSoldier'){
+		for (i in currentSoldiers){
+			currentSoldiers[i].trainSoldier()
+		}
+	} else {
+		currentAction = a;
 	}
-	currentAction = a;
 }
 var spritesProgress = function(){
 	// aim the turrets and fire if possible

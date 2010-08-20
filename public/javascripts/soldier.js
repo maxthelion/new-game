@@ -8,11 +8,30 @@ function Soldier(x, y) {
 	var currentPoint;
 	var nextPoint;
 	var target;
-	this.actions = [ 'move', 'stop' ]
+	var agro = false
+	this.actions = [ 'move', 'stop', 'attack' ]
+	var range = 40;
+	this.firing = false
+	this.healthPercent = 1
+	this.dead = false
 	
 	this.enterFrame = function(){
 		currentSpeed = self.speed;
-		getNewPos()
+		if(target){
+			if ( distance(self,target) < range && agro){
+				if(!target.dead){
+					self.firing = true
+					target.takeHit(1)
+				} else {
+					self.firing = false
+					agro = false
+					target = null
+				}				
+			} else {
+				getNewPos()
+			}
+		}
+
 		// if (nextPoint == undefined){
 		// 	self.destC();
 		// 	return false
@@ -27,11 +46,35 @@ function Soldier(x, y) {
 		// }
 	}
 	
+	this.takeHit = function(damage){
+		if(self.currentHealth < 1){
+			self.dead = true
+			removeSprite('s', self.id);
+			addCorpse(self.cX, self.cY);
+		} else {
+			self.currentHealth = (self.currentHealth != undefined) ? self.currentHealth : self.health
+			self.currentHealth -= damage
+			self.healthPercent = self.currentHealth / self.health
+			self.hitInFrame = frameNum
+		}
+	}
+	
 	this.doCurrentAction = function(action, x, y){
 		if (action == 'move') {			
 			target = {
 				cX: x,
 				cY: y
+			}
+		} else if(action == 'attack'){
+			var potentialTargets = checkSoldierAtLocation(x, y);
+			if (potentialTargets.length > 0){
+				target = potentialTargets[0]
+				agro = true
+			} else {
+				target = {
+					cX: x,
+					cY: y
+				}
 			}
 		}
 	}
@@ -57,17 +100,30 @@ function Soldier(x, y) {
   //  }
 	// }
 	
+	var distance = function(p1,p2){
+	 var dist,dx,dy;
+	 dx = p2.cX-p1.cX;
+	 dy = p2.cY-p1.cY;
+	 dist = Math.sqrt(dx*dx + dy*dy);
+	 return dist
+	}
+	
 	var getNewPos = function(){
 		if (target){
-			if (target.cX > self.cX){
-				self.cX += currentSpeed;
-			} else {
-				self.cX -= currentSpeed;
-			}
-			if (target.cY > self.cY){
-				self.cY += currentSpeed;
-			} else {
-				self.cY -= currentSpeed;
+			if(distance(self,target) < currentSpeed){
+				self.cX = target.cX
+				self.cY = target.cY
+			}else{
+				if (target.cX > self.cX){
+					self.cX += currentSpeed;
+				} else {
+					self.cX -= currentSpeed;
+				}
+				if (target.cY > self.cY){
+					self.cY += currentSpeed;
+				} else {
+					self.cY -= currentSpeed;
+				}
 			}
 		}
 	}

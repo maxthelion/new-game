@@ -9,7 +9,7 @@ var Grid = function(canvas_id, grid) {
 	var gridYInterval = canvas.height / height;
 	var gridHeight = canvas.height;
 	var gridWidth = canvas.width;
-	var highLight;
+	var highlight;
 	
 	var draw = function(){
 		ctx.clearRect(0,0,gridWidth, gridHeight);
@@ -19,6 +19,7 @@ var Grid = function(canvas_id, grid) {
 			ctx.fillStyle = 'rgba(0, 255, 0, 0.5)'
 			ctx.fillRect(endSelectionX-10,endSelectionY-10,20, 20);
 		}
+		// draw the selection marquee
 		if(
 			startSelectionX &&
 			startSelectionY &&
@@ -30,13 +31,27 @@ var Grid = function(canvas_id, grid) {
 				endSelectionX - startSelectionX, 
 				startSelectionY - endSelectionY);	
 		}
-		// draw turrets
+		if (highlight){
+			ctx.fillStyle = 'cyan'
+			ctx.fillRect(
+				highlight.pX * gridXInterval,
+				highlight.pY * gridYInterval,
+				gridXInterval,
+				gridYInterval
+			);
+		}
+		// draw soldiers
 		for(var i =0; i < spritesArray.length; i++){
 			u = spritesArray[i]
 			if (u.selected) {
 				ctx.fillStyle = 'yellow'
 				ctx.fillRect(u.cX - 20,u.cY - 20,40, 40);
 			}
+			if (u.firing){
+				ctx.fillStyle = 'orange'
+				ctx.fillRect(u.cX - 20,u.cY - 20,40, 40);
+			}
+			drawHealth(u.cX, u.cY - 20, 30, 5, u.healthPercent)
 			drawSprite(u.spriteX, u.cX, u.cY)
 		}
 	};
@@ -75,6 +90,15 @@ var Grid = function(canvas_id, grid) {
 		ctx.drawImage(sprites_img, sx, 0, cw, ch, x - cw/2, y - cw/2, cw, ch)
 	}
 	
+	var cellPointFromXY = function(x, y){
+		return {
+			cX: x,
+			cY: y,
+			pX: Math.floor(x/gridXInterval),
+			pY: Math.floor(y/gridYInterval)
+		}
+	};
+	
 	this.pointCenterXY = function(x, y){
 		return [ pixelC(x), pixelC(y) ]
 	};
@@ -89,6 +113,7 @@ var Grid = function(canvas_id, grid) {
 	    startSelectionY,
 		endSelectionX,
 		endSelectionY
+		
 	$(canvas).mousedown(function(evt){
 		startSelectionX = evt.offsetX
 		startSelectionY = evt.offsetY
@@ -99,6 +124,7 @@ var Grid = function(canvas_id, grid) {
 	$(canvas).mousemove(function(evt){
 		endSelectionX = evt.offsetX
 		endSelectionY = evt.offsetY
+		highlight = cellPointFromXY(evt.offsetX, evt.offsetY)
 		selecting = true
 	})
 	
@@ -108,24 +134,16 @@ var Grid = function(canvas_id, grid) {
 		// var yIndex = MF( evt.offsetY/gridYInterval )
 		var x = evt.offsetX
 		var y = evt.offsetY
-		// check if there is a soldier here already
-		if(startSelectionX ==  x && startSelectionY == y){
-			soldiers = checkSoldierAtLocation(x,y)
+		if ( currentAction ){
+			executeCurrentAction(x, y)
 		} else {
-			soldiers = checkSoldiersWithinSelection(startSelectionX, startSelectionY, x,y)
-		}
-		// if nothing selected
-		if (soldiers.length>0){
-			setSelectedUnits(soldiers)
-		} else if ( currentSoldiers.length > 0 && currentAction){
-			for (i in currentSoldiers){
-				currentSoldiers[i].doCurrentAction(currentAction, x,y)
+			// check if there is a soldier here already
+			if(startSelectionX ==  x && startSelectionY == y){
+				soldiers = checkSoldierAtLocation(x,y)
+			} else {
+				soldiers = checkSoldiersWithinSelection(startSelectionX, startSelectionY, x,y)
 			}
-		} else {
-			addSoldier(
-				evt.offsetX,
-				evt.offsetY
-			);
+			setSelectedUnits(soldiers)
 		}
 		draw();
 		startSelectionX = null
@@ -134,48 +152,5 @@ var Grid = function(canvas_id, grid) {
 		endSelectionY = null
 		selecting = false;
 	});
-	
-	// $(canvas).mousemove(function(evt){
-	// 	if (!selectedUnit && playing) {
-	// 		var xIndex = MF( evt.offsetX/gridXInterval )
-	// 		var yIndex = MF( evt.offsetY/gridYInterval )
-	// 		highLight = [xIndex, yIndex];
-	// 		hlp = self.pointCenterXY(xIndex, yIndex)
-	// 	}
-	// });
-	// 
-	// $(canvas).mouseout(function(evt){
-	// 	highLight = null;
-	// });
 
-	// var showTurretControl = function(t){
-	// 	$('#fC').remove()
-	// 	var elem = $('<div id="fC"></div>')
-	// 	$('#cW').append(elem)
-	// 	
-	// 	w = elem.width()
-	// 	h = elem.height()
-	// 	coords = [ t.cX  - (w/2), t.cY  - (h/2) ]
-	// 	elem.css('left', coords[0])
-	// 	elem.css('top', coords[1])
-	// 	// sellAmount = 2
-	// 	// upgradeBtn = $('<a>').attr({
-	// 	// 	href: '#',
-	// 	// 	id: 'upgradeBtn'
-	// 	// }).html('<span>^</span><span class="amount">'+sellAmount+'</span>')
-	// 	
-	// 	sellBtn = $('<a>').attr({
-	// 		href: '#',
-	// 		id: 'sellBtn'
-	// 	}).html('<span>$</span><span class="amount">'+t.sellCost()+'</span>').
-	// 	click(function(){
-	// 		mUM.sell(t);
-	// 		elem.remove();
-	// 		selectedUnit = undefined;
-	// 		return false;
-	// 	})
-	// 	
-	// 	//elem.append(upgradeBtn)
-	// 	elem.append(sellBtn)
-	// }
 };

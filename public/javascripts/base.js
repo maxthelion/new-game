@@ -1,11 +1,12 @@
 var Base = function(x, y){
+	var self = this
 	this.cX = x;
 	this.cY = y;
 	this.actions = [ 'trainSoldier' ];
+	this.healthPercent = 1;
 	
-	this.doCurrentAction = function(action, x, y){
-		if (action == 'trainSoldier') {			
-			addSoldier(x, y)
-		}
+	this.trainSoldier = function(){
+		
+		addSoldier(self.cX + 30, self.cY)
 	}
 }
