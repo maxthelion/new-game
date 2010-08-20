@@ -15,6 +15,10 @@ var Grid = function(canvas_id, grid) {
 		ctx.clearRect(0,0,gridWidth, gridHeight);
 		ctx.fillStyle = '#e3d19b'
 		ctx.fillRect(0,0,gridWidth, gridHeight);
+		if (endSelectionX && endSelectionY){
+			ctx.fillStyle = 'rgba(0, 255, 0, 0.5)'
+			ctx.fillRect(endSelectionX-10,endSelectionY-10,20, 20);
+		}
 		if(
 			startSelectionX &&
 			startSelectionY &&
@@ -112,15 +116,7 @@ var Grid = function(canvas_id, grid) {
 		}
 		// if nothing selected
 		if (soldiers.length>0){
-			for(i in currentSoldiers){
-				currentSoldiers[i].selected = false
-			}
-			currentSoldiers = [];
-			showActionsForSoldier(soldiers[0])
-			for (i in soldiers){
-				soldiers[i].selected = true
-				currentSoldiers.push(soldiers[i])
-			}
+			setSelectedUnits(soldiers)
 		} else if ( currentSoldiers.length > 0 && currentAction){
 			for (i in currentSoldiers){
 				currentSoldiers[i].doCurrentAction(currentAction, x,y)

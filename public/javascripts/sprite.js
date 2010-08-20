@@ -2,6 +2,7 @@ var id = 0;
 var sprites = {}
 var spritesArray = []
 sprites['s'] = {} // terrain
+sprites['b'] = {} // buildings
 
 var redoSprites = function(){
 	spritesArray = []

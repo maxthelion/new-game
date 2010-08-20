@@ -23,6 +23,8 @@ sprites_img = new Image();
 var start = function(){
 	playing = true;
 	globalInterval = setInterval(frameFunction, 60);
+	addSoldier(200, 100);
+	addBase(400, 100)
 }
 
 $().ready(function(){	
@@ -34,9 +36,21 @@ $().ready(function(){
 		mygrid.public_draw();
 		start()
 	}
-	
-	addSoldier(200, 300);
 });
+
+var addBase = function(x, y){
+	var b = new Base(x, y);
+	attrs = {
+		 name: 'base',
+		 health: 30,
+		 type: Base,
+		 spriteX: 200
+	}
+	for (i in attrs) {
+		b[i] = attrs[i]
+	};
+	addSprite('b', b)
+}
 
 var addSoldier = function(x, y){
 	var s = new Soldier(x, y);
@@ -65,6 +79,7 @@ var checkSoldiersWithinSelection = function(x1, y1, x, y){
 	};
 	return soldiers;
 }
+
 var checkSoldierAtLocation = function(x, y){
 	var soldiers = []
 	for (var i=0; i < spritesArray.length; i++) {
@@ -76,7 +91,19 @@ var checkSoldierAtLocation = function(x, y){
 	return soldiers;
 }
 
-
+setSelectedUnits = function(soldiers){
+	for(i in currentSoldiers){
+		currentSoldiers[i].selected = false
+	}
+	currentSoldiers = [];
+	showActionsForSoldier(soldiers[0])
+	$('#units').empty()
+	for (i in soldiers){
+		soldiers[i].selected = true
+		currentSoldiers.push(soldiers[i])
+		$('#units').append('<p> soldier '+soldiers[i].id+'</p>')
+	}
+}
 showActionsForSoldier = function(s){
 	if (s){
 		$('#tools').empty()
