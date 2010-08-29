@@ -15,7 +15,7 @@ var currentAction;
 var frameFunction = function(){
 	frameNum ++;
 	spritesProgress();
-	mygrid.public_draw();
+	mycanvas.public_draw();
 }
 
 sprites_img = new Image(); 
@@ -29,11 +29,12 @@ var start = function(){
 
 $().ready(function(){	
 	grid = GridGenerator(40, 10);		
-	mygrid = new Grid('canvas', grid);
+	myGridManager = new GridManager(grid, 800, 200);
+	mycanvas = new CanvasManager('canvas', grid);
 	
 	sprites_img.src = 'soldier.png';
 	sprites_img.onload = function(){
-		mygrid.public_draw();
+		mycanvas.public_draw();
 		start()
 	}
 });

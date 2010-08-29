@@ -1,15 +1,11 @@
 var selectedUnit;
-var Grid = function(canvas_id, grid) {
+var CanvasManager = function(canvas_id, grid) {
 	var self = this;
 	var canvas = document.getElementById(canvas_id)
 	var ctx = canvas.getContext('2d'); 
-	var width = grid[0].length;
-	var height = grid.length;
-	var gridXInterval = canvas.width / width;
-	var gridYInterval = canvas.height / height;
+	var highlight;
 	var gridHeight = canvas.height;
 	var gridWidth = canvas.width;
-	var highlight;
 	
 	var draw = function(){
 		ctx.clearRect(0,0,gridWidth, gridHeight);
@@ -34,10 +30,10 @@ var Grid = function(canvas_id, grid) {
 		if (highlight){
 			ctx.fillStyle = 'cyan'
 			ctx.fillRect(
-				highlight.pX * gridXInterval,
-				highlight.pY * gridYInterval,
-				gridXInterval,
-				gridYInterval
+				highlight.pX * myGridManager.gridXInterval,
+				highlight.pY * myGridManager.gridYInterval,
+				myGridManager.gridXInterval,
+				myGridManager.gridYInterval
 			);
 		}
 		// draw soldiers
@@ -54,8 +50,22 @@ var Grid = function(canvas_id, grid) {
 			drawHealth(u.cX, u.cY - 20, 30, 5, u.healthPercent)
 			drawSprite(u.spriteX, u.cX, u.cY)
 		}
+		drawLines();
 	};
 	
+	var drawLines = function(){
+		ctx.beginPath()
+		for (var i=0; i < grid[0].length; i++) {
+			ctx.moveTo( i * myGridManager.gridXInterval, 0)
+			ctx.lineTo( i * myGridManager.gridXInterval, gridHeight)
+		};
+		
+		for (var i=0; i < grid.length; i++) {
+			ctx.moveTo( 0, i * myGridManager.gridXInterval)
+			ctx.lineTo( gridWidth, i * myGridManager.gridXInterval)
+		};
+		ctx.stroke()
+	}
 	// called from the setinterval
 	this.public_draw = function(){
 		draw();
@@ -94,8 +104,8 @@ var Grid = function(canvas_id, grid) {
 		return {
 			cX: x,
 			cY: y,
-			pX: Math.floor(x/gridXInterval),
-			pY: Math.floor(y/gridYInterval)
+			pX: Math.floor(x/myGridManager.gridXInterval),
+			pY: Math.floor(y/myGridManager.gridYInterval)
 		}
 	};
 	
