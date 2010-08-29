@@ -9,7 +9,11 @@ function Soldier(x, y) {
 	var nextPoint;
 	var target;
 	var agro = false
-	this.actions = [ 'move', 'stop', 'attack' ]
+	this.actions = [ 
+		{name:'move', requiresTarget: true}, 
+		{name:'stop', requiresTarget: false}, 
+		{name:'attack', requiresTarget: true} 
+	]
 	var range = 40;
 	this.firing = false
 	this.healthPercent = 1
@@ -59,23 +63,10 @@ function Soldier(x, y) {
 		}
 	}
 	
-	this.doCurrentAction = function(action, x, y){
-		if (action == 'move') {			
-			target = {
-				cX: x,
-				cY: y
-			}
-		} else if(action == 'attack'){
-			var potentialTargets = checkSoldierAtLocation(x, y);
-			if (potentialTargets.length > 0){
-				target = potentialTargets[0]
-				agro = true
-			} else {
-				target = {
-					cX: x,
-					cY: y
-				}
-			}
+	this.doCurrentAction = function(action, newTarget){
+		target = newTarget
+		if(action.name == 'attack'){
+			agro = true
 		}
 	}
 	

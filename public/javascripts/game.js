@@ -98,7 +98,7 @@ setSelectedUnits = function(soldiers){
 		currentSoldiers[i].selected = false
 	}
 	currentSoldiers = [];
-	showActionsForSoldier(soldiers[0])
+	showActionsForUnit(soldiers[0])
 	for (i in soldiers){
 		soldiers[i].selected = true
 		currentSoldiers.push(soldiers[i])
@@ -107,11 +107,11 @@ setSelectedUnits = function(soldiers){
 		});
 	}
 }
-showActionsForSoldier = function(s){
+showActionsForUnit = function(s){
 	$('#tools').empty()
 	if (s){
 		for (i in s.actions){
-			var button = $('<a href="#"></a>').text(s.actions[i])
+			var button = $('<a href="#"></a>').text(s.actions[i].name)
 			button.data('foo', s.actions[i])
 			button.click(function(){
 				setCurrentAction($(this).data('foo'))
@@ -121,25 +121,25 @@ showActionsForSoldier = function(s){
 		}
 	}
 }
-executeCurrentAction = function(x, y){
+executeCurrentAction = function(target){
 	for (i in currentSoldiers){
-		currentSoldiers[i].doCurrentAction(currentAction, x,y)
+		currentSoldiers[i].doCurrentAction(currentAction, target)
 	}
 	currentAction = null
 	$('.selected').removeClass('selected');
 }
 
 var setCurrentAction = function(a){
-	if (a == "stop"){
+	if (a.requiresTarget == true){
+		currentAction = a;
+	} else if (a.name == 'stop') {
 		for (i in currentSoldiers){
 			currentSoldiers[i].stop()
 		}
-	} else if (a == 'trainSoldier'){
+	} else if (a.name == 'trainSoldier'){
 		for (i in currentSoldiers){
 			currentSoldiers[i].trainSoldier()
 		}
-	} else {
-		currentAction = a;
 	}
 }
 var spritesProgress = function(){

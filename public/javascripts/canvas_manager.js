@@ -13,7 +13,12 @@ var CanvasManager = function(canvas_id, grid) {
 		ctx.fillRect(0,0,gridWidth, gridHeight);
 		if (endSelectionX && endSelectionY){
 			ctx.fillStyle = 'rgba(0, 255, 0, 0.5)'
-			ctx.fillRect(endSelectionX-10,endSelectionY-10,20, 20);
+			ctx.fillRect(
+				endSelectionX-(myGridManager.cellWidth /2),
+				endSelectionY-(myGridManager.cellWidth /2),
+				myGridManager.cellWidth, 
+				myGridManager.cellHeight
+			);
 		}
 		// draw the selection marquee
 		if(
@@ -30,10 +35,10 @@ var CanvasManager = function(canvas_id, grid) {
 		if (highlight){
 			ctx.fillStyle = 'cyan'
 			ctx.fillRect(
-				highlight.pX * myGridManager.gridXInterval,
-				highlight.pY * myGridManager.gridYInterval,
-				myGridManager.gridXInterval,
-				myGridManager.gridYInterval
+				highlight.pX * myGridManager.cellWidth,
+				highlight.pY * myGridManager.cellHeight,
+				myGridManager.cellWidth,
+				myGridManager.cellHeight
 			);
 		}
 		// draw soldiers
@@ -56,13 +61,13 @@ var CanvasManager = function(canvas_id, grid) {
 	var drawLines = function(){
 		ctx.beginPath()
 		for (var i=0; i < grid[0].length; i++) {
-			ctx.moveTo( i * myGridManager.gridXInterval, 0)
-			ctx.lineTo( i * myGridManager.gridXInterval, gridHeight)
+			ctx.moveTo( i * myGridManager.cellWidth, 0)
+			ctx.lineTo( i * myGridManager.cellWidth, gridHeight)
 		};
 		
 		for (var i=0; i < grid.length; i++) {
-			ctx.moveTo( 0, i * myGridManager.gridXInterval)
-			ctx.lineTo( gridWidth, i * myGridManager.gridXInterval)
+			ctx.moveTo( 0, i * myGridManager.cellWidth)
+			ctx.lineTo( gridWidth, i * myGridManager.cellWidth)
 		};
 		ctx.stroke()
 	}
@@ -83,7 +88,7 @@ var CanvasManager = function(canvas_id, grid) {
 	}
 	
 	var pixelC = function(p){
-		return p * gridXInterval + (gridXInterval / 2);
+		return p * cellWidth + (cellWidth / 2);
 	}
 	
 	var drawHealth = function(x,y,w,h,health){
@@ -100,25 +105,6 @@ var CanvasManager = function(canvas_id, grid) {
 		ctx.drawImage(sprites_img, sx, 0, cw, ch, x - cw/2, y - cw/2, cw, ch)
 	}
 	
-	var cellPointFromXY = function(x, y){
-		return {
-			cX: x,
-			cY: y,
-			pX: Math.floor(x/myGridManager.gridXInterval),
-			pY: Math.floor(y/myGridManager.gridYInterval)
-		}
-	};
-	
-	this.pointCenterXY = function(x, y){
-		return [ pixelC(x), pixelC(y) ]
-	};
-	
-	this.cellFromPosition = function(position){
-		var xIndex = MF( position[0] / gridXInterval )
-		var yIndex = MF( position[1] / gridYInterval )
-		return [xIndex, yIndex];
-	};
-	
 	var startSelectionX,
 	    startSelectionY,
 		endSelectionX,
@@ -134,18 +120,19 @@ var CanvasManager = function(canvas_id, grid) {
 	$(canvas).mousemove(function(evt){
 		endSelectionX = evt.offsetX
 		endSelectionY = evt.offsetY
-		highlight = cellPointFromXY(evt.offsetX, evt.offsetY)
+		highlight = myGridManager.targetAtPos(evt.offsetX, evt.offsetY)
 		selecting = true
 	})
 	
 	
 	$(canvas).mouseup(function(evt){
-		// var xIndex = MF( evt.offsetX/gridXInterval )
-		// var yIndex = MF( evt.offsetY/gridYInterval )
+		// var xIndex = MF( evt.offsetX/cellWidth )
+		// var yIndex = MF( evt.offsetY/cellHeight )
 		var x = evt.offsetX
 		var y = evt.offsetY
 		if ( currentAction ){
-			executeCurrentAction(x, y)
+			target = myGridManager.targetAtPos(x,y)
+			executeCurrentAction(target)
 		} else {
 			// check if there is a soldier here already
 			if(startSelectionX ==  x && startSelectionY == y){
